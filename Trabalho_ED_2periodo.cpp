@@ -9,7 +9,7 @@ class Dados
 {
     private:
         int mId;
-        char mNome[70];
+        char mNome[80];
         char mCidade[70];
         char mEsporte[70];
         char mEvento[70];
@@ -58,7 +58,7 @@ void Dados::exibir()
 void Dados::conversao()
 {
     //começar a leitura do csv
-    ifstream ler("base15K.csv");
+    ifstream ler("baseTest.csv");
     string LINHA;
     getline(ler, LINHA, '\n');
 
@@ -76,16 +76,19 @@ void Dados::conversao()
         getline(ler, idString, ',');
         getline(ler, nome, ',');
 
-        while (nome.front() == '"' and nome.back() != '"') 
+        if (nome.front() == '"' and nome.back() != '"') 
         {
-            // O campo mEvento contém uma vírgula dentro de aspas
             string nomeTemp;
-            while (nomeTemp.back() != '"') 
+            while(nome.back() != '"')
             {
                 getline(ler, nomeTemp, ',');
-                nome += ',' + nomeTemp;
+                nome+= ','+ nomeTemp;
             }
         }
+        
+
+        //"Joseph ""Joe"" Angyal, Jr.",
+        //"Tenley Emma Albright (-Gardiner, -Blakely)",
         
         getline(ler, cidade, ',');
         getline(ler, esporte, ',');
