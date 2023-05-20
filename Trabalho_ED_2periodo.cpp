@@ -148,7 +148,78 @@ void Dados::trocar_elementos(int x, int y)
 
 }
 
-void Dados::adicionar(){}
+void Dados::adicionar()
+{
+	fstream file ("base.bin", ios::binary | ios::in | ios::out | ios::ate);
+	if (!file.is_open())
+	{
+		cout << "Falha ao abrir o arquivo. " << endl;
+	}
+	else
+	{
+		// OPERAÇÕES PARA CALCULAR A QUANTIDADE DE REGISTROS CONTIDOS NO ARQUIVO
+		streampos fileSize = file.tellg();
+		size_t classSize = sizeof(Dados);
+		size_t numRecords = (fileSize / classSize) - 1; // -1 UTILIZADO PARA DESCONSIDERAR A PRIMEIRA LINHA DO ARQUIVO
+		
+		
+		// GET UMA POSIÇÃO VÁLIDA PARA INSERÇÃO
+		int posicaoAInserir;
+		cout << "Digite a posição a inserir um novo registro (0 - " << numRecords << ") : ";
+		cin >> posicaoAInserir;
+		while (posicaoAInserir < 0 or posicaoAInserir > int(numRecords))
+		{
+			cout << "Digite uma posição válida!\n> ";
+			cin >> posicaoAInserir;
+		}
+		
+		
+		// CRIA O REGISTRO E RECEBE OS DADOS
+		Dados d;
+		
+		cout << "Digite o Id do atleta: ";
+		cin >> d.mId;
+		cin.ignore();
+		cin.clear();
+		
+		cout << "Digite o nome do atleta: ";
+		cin.getline(d.mNome, 80);
+		cin.clear();
+		
+		cout << "Digite a cidade do atleta: ";
+		cin.getline(d.mCidade, 70);
+		cin.clear();
+		
+		cout << "Digite o esporte praticado pelo atleta: ";
+		cin.getline(d.mEsporte, 70);
+		cin.clear();
+		
+		cout << "Digite o evento que o atleta participa: ";
+		cin.getline(d.mEvento, 70);
+		cin.clear();
+		
+		cout << "Digite a sigla do país do atleta: ";
+		cin.getline(d.mNoc, 4);
+		cin.clear();
+		
+		// CRIA UMA AUXILIAR PARA RECEBER OS REGISTROS UM A UM
+		Dados aux;
+		
+		for (int i = numRecords; i >= posicaoAInserir; i--)
+		{
+			file.seekg(i*sizeof(Dados));
+			file.read((char*)&aux, sizeof(Dados));
+			file.seekp((i+1)*sizeof(Dados));
+			file.write((char*)&aux, sizeof(Dados));
+		}
+		
+		file.seekp(posicaoAInserir*sizeof(Dados));
+		file.write((char*)&d, sizeof(Dados));
+		
+		file.close();
+		
+	}
+}
 
 void apresentacao()
 {
