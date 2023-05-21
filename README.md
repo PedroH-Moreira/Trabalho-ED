@@ -161,6 +161,118 @@ void Dados::conversao()
 ```
 
 ## Alterar dado
+- Nesta função, o arquivo binário é aberto de forma a possibilitar entrada e saída de dados. Posteriormente, foi criada a variável numRecords("quantidade de registros") para contabilizar a quantidade de objetos escritos no arquivo. 
+- A estrutura de repetição while() foi utilizada para garantir que o user digite somente uma posição válida no arquivo.
+- É feito o posicionamento do ponteiro de leitura (seekg) na posição atribuída pelo user, seguido pela alocação dos dados no objeto "d".
+- Cria-se um menu (switch) para a seleção de atributo a ser alterado.
+- É feito o posicionamento do ponteiro de escrita (seekp) na posição atribuída pelo user, seguido pela escrita do objeto modificado "d" no arquivo.
+- Por fim, o arquivo é fechado e encerra-se a função.
+
+```cpp
+void Dados::alterar_dado()
+{
+    fstream file ("base.bin", ios::binary | ios::in | ios::out | ios::ate);
+	if (!file.is_open())
+	{
+		cout << "Falha ao abrir o arquivo. " << endl;
+	}
+	else
+	{
+		// OPERAÇÕES PARA CALCULAR A QUANTIDADE DE REGISTROS CONTIDOS NO ARQUIVO
+		streampos fileSize = file.tellg();
+		size_t classSize = sizeof(Dados);
+		size_t numRecords = (fileSize / classSize) - 1; // -1 UTILIZADO PARA DESCONSIDERAR A PRIMEIRA LINHA DO ARQUIVO
+		
+		
+		// GET UMA POSIÇÃO VÁLIDA PARA ALTERAÇÃO
+		int posicaoAlterar;
+		cout << "Digite a posicao a se alterar (0 - " << numRecords << ")\n> ";
+		cin >> posicaoAlterar;
+		while (posicaoAlterar < 0 or posicaoAlterar > int(numRecords))
+		{
+			cout << "Digite uma posicao valida!\n> ";
+			cin >> posicaoAlterar;
+		}
+		cin.ignore();
+		cin.clear();
+		
+		
+		// CRIA UMA VARIÁVEL PARA RECEBER O REGISTRO A SER ALTERADO
+		Dados d;
+		
+		
+		// POSICIONA O PONTEIRO DE LEITURA PARA A POSIÇÃO DESEJADA PARA ALTERAÇAO
+		file.seekg(posicaoAlterar * sizeof(Dados));
+		file.read((char*)&d, sizeof(Dados));
+		
+		
+		// SWITCH CASE PARA O USER DECIDIR QUAL ATRIBUTO DO REGISTRO IRÁ ALTERAR
+		int opt;
+		do
+		{
+			cout << "\n(1) Alterar Id\n(2) Alterar nome\n(3) Alterar cidade\n(4) Alterar esporte\n(5) Alterar evento\n(6) Alterar noc\n(0) Sair\n> ";
+			cin >> opt;
+			cin.ignore();
+			cin.clear();
+			
+			switch (opt)
+			{
+				case 1:
+					cout << "Entre com o novo Id : ";
+					cin >> d.mId;
+					cin.ignore();
+					cin.clear();
+					break;
+					
+				case 2:
+					cout << "Entre com o novo nome : ";
+					cin.getline(d.mNome, 80);
+					cin.clear();
+					break;
+					
+				case 3:
+					cout << "Entre com a nova cidade : ";
+					cin.getline(d.mCidade, 70);
+					cin.clear();
+					break;
+					
+				case 4:
+					cout << "Entre com o novo esporte : ";
+					cin.getline(d.mEsporte, 70);
+					cin.clear();
+					break;
+					
+				case 5:
+					cout << "Entre com o novo evento : ";
+					cin.getline(d.mEvento, 70);
+					cin.clear();
+					break;
+					
+				case 6:
+					cout << "Entre com a nova sigla do pais : ";
+					cin.getline(d.mNoc, 4);
+					cin.clear();
+					
+				case 0:
+					break;
+				
+				default:
+					cout << "Digite um comando valido. \n";
+					break;
+			}
+		} while (opt != 0);
+		
+		
+		// ESCREVE O REGISTRO COM OS DADOS ALTERADOS NA POSIÇÃO DESEJADA
+		file.seekp(posicaoAlterar * sizeof(Dados));
+		file.write((char*)&d, sizeof(Dados));
+		
+		
+		file.close();
+	}
+}
+```
+
 
 
 
