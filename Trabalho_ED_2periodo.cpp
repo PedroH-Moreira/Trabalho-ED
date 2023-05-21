@@ -205,6 +205,7 @@ void Dados::adicionar()
 		// CRIA UMA AUXILIAR PARA RECEBER OS REGISTROS UM A UM
 		Dados aux;
 		
+		// POSICIONA O PONTEIRO DE LEITURA E DE ESCRITA AO FINAL DO ARQUIVO - REALIZA A LEITURA - ESCREVE O REGISTRO UMA POSIÇÃO A FRENTE ATÉ QUE SE ATINJA A POSIÇÃO DE INSERÇÃO
 		for (int i = numRecords; i >= posicaoAInserir; i--)
 		{
 			file.seekg(i*sizeof(Dados));
