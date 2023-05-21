@@ -49,9 +49,7 @@ Dados::Dados(string id, string Nome, string Cidade, string Esporte, string Event
 	try {
         this->mId = stoi(id);
     } catch (const exception& e) {
-        // Tratamento de erro em caso de conversão inválida
-        // Por exemplo, definir um valor padrão para mId ou lançar uma exceção
-        this->mId = -1; // Valor padrão para mId em caso de erro
+        this->mId = -1; // Valor padrão para mId em caso de conversão inválida
     }
     strcpy(this->mNome, Nome.c_str());
     strcpy(this->mCidade, Cidade.c_str());
@@ -81,7 +79,7 @@ void Dados::exibir()
 void Dados::conversao()
 {
     //começar a leitura do csv
-    ifstream ler("base15K.csv");
+    ifstream ler("data_athlete_event.csv");
     string LINHA;
     getline(ler, LINHA, '\n');
     //pegar a primeira linha da base <Id,Name,City,Sport,Event,NOC>
@@ -134,7 +132,7 @@ void Dados::conversao()
         cont++;
         if(cont % 5000 == 0)
         {
-            cout << "Convertendo o arquivo para binario..\nProgresso = " << porcentagem << "%";
+            cout << "Convertendo o arquivo para binario...\nProgresso = " << porcentagem << "%";
         } else if(cont % 4999 == 0)
                 {
                     system(CLEAR.c_str());
@@ -204,11 +202,11 @@ void Dados::alterar_dado()
 		
 		// GET UMA POSIÇÃO VÁLIDA PARA ALTERAÇÃO
 		int posicaoAlterar;
-		cout << "Digite a posição a se alterar (0 - " << numRecords << ")\n> ";
+		cout << "Digite a posicao a se alterar (0 - " << numRecords << ")\n> ";
 		cin >> posicaoAlterar;
 		while (posicaoAlterar < 0 or posicaoAlterar > int(numRecords))
 		{
-			cout << "Digite uma posição válida!\n> ";
+			cout << "Digite uma posicao valida!\n> ";
 			cin >> posicaoAlterar;
 		}
 		cin.ignore();
@@ -267,7 +265,7 @@ void Dados::alterar_dado()
 					break;
 					
 				case 6:
-					cout << "Entre com a nova sigla do país : ";
+					cout << "Entre com a nova sigla do pais : ";
 					cin.getline(d.mNoc, 4);
 					cin.clear();
 					
@@ -275,7 +273,7 @@ void Dados::alterar_dado()
 					break;
 				
 				default:
-					cout << "Digite um comando válido. \n";
+					cout << "Digite um comando valido. \n";
 					break;
 			}
 		} while (opt != 0);
@@ -294,7 +292,7 @@ void Dados::trocar_elementos()
 {
     fstream file("base.bin", ios_base::binary | ios_base::ate | ios_base:: in | ios_base::out);
     int posx, posy;
-    cout << "Digite a posicoes em que deseja fazer a troca\n";
+    cout << "Digite as posicoes em que deseja fazer a troca\n";
     cout << "x > ";
     cin >> posx; cout << endl;
     cout << "y > ";
@@ -335,11 +333,11 @@ void Dados::adicionar()
 		
 		// GET UMA POSIÇÃO VÁLIDA PARA INSERÇÃO
 		int posicaoAInserir;
-		cout << "Digite a posição a inserir um novo registro (0 - " << numRecords << ") : ";
+		cout << "Digite a posicao a inserir um novo registro (0 - " << numRecords << ") : ";
 		cin >> posicaoAInserir;
 		while (posicaoAInserir < 0 or posicaoAInserir > int(numRecords))
 		{
-			cout << "Digite uma posição válida!\n> ";
+			cout << "Digite uma posicao valida!\n> ";
 			cin >> posicaoAInserir;
 		}
 		
@@ -367,7 +365,7 @@ void Dados::adicionar()
 		cin.getline(d.mEvento, 70);
 		cin.clear();
 		
-		cout << "Digite a sigla do país do atleta: ";
+		cout << "Digite a sigla do pais do atleta: ";
 		cin.getline(d.mNoc, 4);
 		cin.clear();
 		
@@ -436,7 +434,7 @@ int main()
                 d.exibir();
                 break;
             case 'i':
-                cout << "\nDigite o intervalo desejado:\n\n" <<
+                cout << "Digite o intervalo desejado:\n\n" <<
                         "{" << 
                         " Exemplo: intervalo de 5 a 15\n" <<
                         "  x = 5\n" <<
@@ -463,7 +461,7 @@ int main()
             case 's':
                 break;
             default:
-		cout << "Digite um comando válido!\n> ";
+		cout << "Digite um comando valido!\n> ";
                 break;
         }
     }
