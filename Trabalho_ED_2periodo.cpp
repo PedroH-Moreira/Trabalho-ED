@@ -160,7 +160,7 @@ void Dados::exibir_intervalo(int x, int y)
 		size_t classSize = sizeof(Dados);
 		size_t numRecords = (fileSize / classSize) - 1; // -1 UTILIZADO PARA DESCONSIDERAR A PRIMEIRA LINHA DO ARQUIVO
 		
-		if (x > (int)numRecords and y > (int)numRecords and x > y and x < 0 and y < 0)
+		if (x > (int)numRecords or y > (int)numRecords or x > y or x < 0 or y < 0)
 		{
 			cout << "Intervalo invalido." << endl;
 			file.close();
