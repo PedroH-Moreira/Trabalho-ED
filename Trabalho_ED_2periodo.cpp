@@ -19,7 +19,7 @@ class Dados
         char mNome[80];
         char mCidade[70];
         char mEsporte[70];
-        char mEvento[70];
+        char mEvento[80];
         char mNoc[4];
     public:
         Dados();
@@ -29,10 +29,9 @@ class Dados
         //exibir entre o intervalo x e y
         void exibir_intervalo(int x, int y);
         void adicionar();
-	//altera os dados de um registro
         void alterar_dado();
         //trocar os elementos x e y de lugar
-        void trocar_elementos(int x, int y);
+        void trocar_elementos();
 };
 
 Dados::Dados()
@@ -63,22 +62,26 @@ Dados::Dados(string id, string Nome, string Cidade, string Esporte, string Event
 
 void Dados::exibir()
 {
-    ifstream fin("base.bin", ios_base::in | ios_base:: binary);
+    ifstream fin;
+    fin.open("base.bin" , ios_base::in | ios_base::binary);
     Dados d;
 
-    while (fin.read((char *)&d, sizeof(Dados)))
+    while ((fin.read((char *)&d, sizeof(Dados))))
     {
         cout << "ID: " << d.mId << " Nome: " << d.mNome << " Cidade: " << d.mCidade;
         cout << " Esporte: " << d.mEsporte << " Evento: " << d.mEvento << " NOC: " << d.mNoc << endl;
     }
     fin.close();
     //remove ("base.bin");
+    //cout << "Digite enter para continuar\n";
+    //char c; cin.get(c);
+    //system(CLEAR.c_str());
 }
 
 void Dados::conversao()
 {
     //começar a leitura do csv
-    ifstream ler("baseTest.csv");
+    ifstream ler("base15K.csv");
     string LINHA;
     getline(ler, LINHA, '\n');
     //pegar a primeira linha da base <Id,Name,City,Sport,Event,NOC>
@@ -86,7 +89,7 @@ void Dados::conversao()
     //enquanto o arquivo não chegar no fim, com o uso do getline e string string para a conversão
     //os dados são passados sempre no final do arquivo binário
     int cont = 0, total = 271117;
-    ofstream escrita("base.bin" , ios::app | ios::binary);
+    ofstream escrita("base.bin" , ios::binary);
     while(!ler.eof())
     {
         string idString, nome, cidade, esporte, evento, noc;
@@ -102,8 +105,8 @@ void Dados::conversao()
             }
         }
 
-        //"Joseph ""Joe"" Angyal, Jr.",
-        //"Tenley Emma Albright (-Gardiner, -Blakely)",
+        //"Joseph ""Joe"" Angyal, Jr.", -> nesse caso lê até a vírgula e entra no if de cima
+        //"Tenley Emma Albright (-Gardiner, -Blakely)", -> e nesse caso também, pq o getline(ler, nome,',') não importa se é ou não uma aspas
         
         getline(ler, cidade, ',');
         getline(ler, esporte, ',');
@@ -124,7 +127,6 @@ void Dados::conversao()
 
         //usando o construtor com parâmetro para associar aos dados da classe
         Dados d(idString, nome, cidade, esporte, evento, noc);
-
         escrita.write((char*)&d, sizeof(Dados));
 
         //exibindo um contador do progresso na tela
@@ -146,7 +148,7 @@ void Dados::conversao()
 
 void Dados::exibir_intervalo(int x, int y)
 {
-	ifstream file ("base.bin", ios_base::in | ios_base:: binary);
+    ifstream file ("base.bin", ios_base::in | ios_base:: binary);
 	
 	if (!file.is_open())
 	{
@@ -187,7 +189,7 @@ void Dados::exibir_intervalo(int x, int y)
 
 void Dados::alterar_dado()
 {
-	fstream file ("base.bin", ios::binary | ios::in | ios::out | ios::ate);
+    fstream file ("base.bin", ios::binary | ios::in | ios::out | ios::ate);
 	if (!file.is_open())
 	{
 		cout << "Falha ao abrir o arquivo. " << endl;
@@ -288,9 +290,33 @@ void Dados::alterar_dado()
 	}
 }
 
-void Dados::trocar_elementos(int x, int y)
+void Dados::trocar_elementos()
 {
+    fstream file("base.bin", ios_base::binary | ios_base::ate | ios_base:: in | ios_base::out);
+    int posx, posy;
+    cout << "Digite a posicoes em que deseja fazer a troca\n";
+    cout << "x > ";
+    cin >> posx; cout << endl;
+    cout << "y > ";
+    cin >> posy; cout << endl;
+    cin.ignore();
 
+    Dados aux1;
+    Dados aux2;
+
+    file.seekg(posx * sizeof(Dados));
+    file.read((char*)&aux1, sizeof(Dados));
+
+    file.seekg(posy * sizeof(Dados));
+    file.read((char*)&aux2, sizeof(Dados));
+
+    file.seekp(posx * sizeof(Dados));
+    file.write((char*)&aux2, sizeof(Dados));
+
+    file.seekp(posy * sizeof(Dados));
+    file.write((char*)&aux1, sizeof(Dados));
+    file.close();
+    cout << "Troca feita com sucesso!\n";
 }
 
 void Dados::adicionar()
@@ -307,7 +333,6 @@ void Dados::adicionar()
 		size_t classSize = sizeof(Dados);
 		size_t numRecords = (fileSize / classSize) - 1; // -1 UTILIZADO PARA DESCONSIDERAR A PRIMEIRA LINHA DO ARQUIVO
 		
-		
 		// GET UMA POSIÇÃO VÁLIDA PARA INSERÇÃO
 		int posicaoAInserir;
 		cout << "Digite a posição a inserir um novo registro (0 - " << numRecords << ") : ";
@@ -317,7 +342,6 @@ void Dados::adicionar()
 			cout << "Digite uma posição válida!\n> ";
 			cin >> posicaoAInserir;
 		}
-		
 		
 		// CRIA O REGISTRO E RECEBE OS DADOS
 		Dados d;
@@ -376,7 +400,7 @@ void apresentacao()
     cout << "Pedro Henrique Cabral Moreira. \n";
     cout << "Professor: Renato Ramos da Silva \n";
     cout << "Base de dados: \"data_athlete_event\"\n";
-    cout << "Digite Enter para iniciar \n";
+    cout << "Digite enter para comecar \n";
     char c; cin.get(c);
     system(CLEAR.c_str());
 }
@@ -405,6 +429,7 @@ int main()
         cin >> key;
         string novoNome;
         int x, y;
+        system(CLEAR.c_str());
         switch(key)
         {
             case 'e':
@@ -429,19 +454,20 @@ int main()
                 break;
             case 't':
                 cin.ignore();
-                cin >> x;
-                cin >> y;
-                d.trocar_elementos(x,y);
+                d.trocar_elementos();
                 break;
             case 'd':
                 cin.ignore();
                 d.adicionar();
+                break;
+            case 's':
+                break;
             default:
-				cout << "Digite um comando válido!\n> ";
+		cout << "Digite um comando válido!\n> ";
                 break;
         }
     }
-    system(CLEAR.c_str());
+
     cout << "\nPrograma encerrado.";
     return 0;
 }
