@@ -79,6 +79,7 @@ void Dados::conversao()
     //enquanto o arquivo não chegar no fim, com o uso do getline e string string para a conversão
     //os dados são passados sempre no final do arquivo binário
     int cont = 0, total = 271117;
+    ofstream escrita("base.bin" , ios::app | ios::binary);
     while(!ler.eof())
     {
         string idString, nome, cidade, esporte, evento, noc;
@@ -112,15 +113,12 @@ void Dados::conversao()
                 evento += ',' + eventoTemp;
             }
         }
-        ler >> noc;
-        ler.ignore();
+        getline(ler, noc);
 
         //usando o construtor com parâmetro para associar aos dados da classe
         Dados d(idString, nome, cidade, esporte, evento, noc);
 
-        ofstream escrita("base.bin" , ios::app | ios::binary);
         escrita.write((char*)&d, sizeof(Dados));
-        escrita.close();
 
         //exibindo um contador do progresso na tela
         int porcentagem = (cont + 1) * 100 / total;
@@ -133,7 +131,7 @@ void Dados::conversao()
                     system(CLEAR.c_str());
                 }
     }
-
+    escrita.close();
     ler.close();
     system(CLEAR.c_str());
     cout << "Arquivo CSV convertido para binario com sucesso\n";
