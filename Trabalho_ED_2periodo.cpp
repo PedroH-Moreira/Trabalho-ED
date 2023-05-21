@@ -47,7 +47,13 @@ Dados::Dados()
 
 Dados::Dados(string id, string Nome, string Cidade, string Esporte, string Event, string Noc)
 {
-    this->mId = stoi(id);
+	try {
+        this->mId = stoi(id);
+    } catch (const exception& e) {
+        // Tratamento de erro em caso de conversão inválida
+        // Por exemplo, definir um valor padrão para mId ou lançar uma exceção
+        this->mId = -1; // Valor padrão para mId em caso de erro
+    }
     strcpy(this->mNome, Nome.c_str());
     strcpy(this->mCidade, Cidade.c_str());
     strcpy(this->mEsporte, Esporte.c_str());
@@ -138,7 +144,46 @@ void Dados::conversao()
     cout << "Arquivo CSV convertido para binario com sucesso\n";
 }
 
-void Dados::exibir_intervalo(int x, int y){}
+void Dados::exibir_intervalo(int x, int y)
+{
+	ifstream file ("base.bin", ios_base::in | ios_base:: binary);
+	
+	if (!file.is_open())
+	{
+		cout << "Falha ao abrir o arquivo. " << endl;
+	}
+	else
+	{
+		// OPERAÇÕES PARA CALCULAR A QUANTIDADE DE REGISTROS CONTIDOS NO ARQUIVO
+		file.seekg(0, ios::end);
+		streampos fileSize = file.tellg();
+		size_t classSize = sizeof(Dados);
+		size_t numRecords = (fileSize / classSize) - 1; // -1 UTILIZADO PARA DESCONSIDERAR A PRIMEIRA LINHA DO ARQUIVO
+		
+		if (x > (int)numRecords and y > (int)numRecords and x > y and x < 0 and y < 0)
+		{
+			cout << "Intervalo invalido." << endl;
+			file.close();
+		}
+		else{
+			
+			Dados d;
+			int posicao_inicial = x, posicao_final = x;
+			
+			file.seekg(posicao_inicial * sizeof(Dados));
+			
+			while (file.read((char *)&d, sizeof(Dados)) and posicao_final <= y and posicao_final <= int(numRecords))
+			{
+				cout << "ID: " << d.mId << " Nome: " << d.mNome << " Cidade: " << d.mCidade;
+				cout << " Esporte: " << d.mEsporte << " Evento: " << d.mEvento << " NOC: " << d.mNoc << endl;
+				++posicao_final;
+			}
+			cout << endl;
+		}
+
+		file.close();
+	}
+}
 
 void Dados::alterar_dado()
 {
@@ -331,7 +376,7 @@ void apresentacao()
     cout << "Pedro Henrique Cabral Moreira. \n";
     cout << "Professor: Renato Ramos da Silva \n";
     cout << "Base de dados: \"data_athlete_event\"\n";
-    cout << "Digite enter para comecar \n";
+    cout << "Digite Enter para iniciar \n";
     char c; cin.get(c);
     system(CLEAR.c_str());
 }
@@ -349,7 +394,8 @@ int main()
 
     while(key != 's')
     {
-        cout << "Escolha a funcao desejada \n";
+	cout << "\n\n==================== MENU =====================\n\n";
+        cout << "Escolha a funcao desejada: \n";
         cout << "e - Exibir todo o arquivo.\n";
         cout << "i - Exibir um intervalo especifico do arquivo.\n";
         cout << "a - Alterar elemento.\n";
@@ -365,10 +411,16 @@ int main()
                 d.exibir();
                 break;
             case 'i':
-                cout << "Digite o intervalo desejado - Exemplo: de x ate y\n";
+                cout << "\nDigite o intervalo desejado:\n\n" <<
+                        "{" << 
+                        " Exemplo: intervalo de 5 a 15\n" <<
+                        "  x = 5\n" <<
+                        "  y = 15\n" <<
+                        "}\n\n" <<
+                        "Insira abaixo:\n";
                 cout << "x = "; cin >> x;
                 cout << "y = "; cin >> y;
-                cout << endl;
+                cout << "\n\n";
                 cin.ignore();
                 d.exibir_intervalo(x,y);
                 break;
@@ -385,11 +437,11 @@ int main()
                 cin.ignore();
                 d.adicionar();
             default:
-		cout << "Digite um comando válido!\n> ";
+				cout << "Digite um comando válido!\n> ";
                 break;
         }
-        system(CLEAR.c_str());
     }
+    system(CLEAR.c_str());
     cout << "\nPrograma encerrado.";
     return 0;
 }
