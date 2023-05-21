@@ -29,7 +29,8 @@ class Dados
         //exibir entre o intervalo x e y
         void exibir_intervalo(int x, int y);
         void adicionar();
-        void alterar_elemento(string novo);
+	//altera os dados de um registro
+        void alterar_dado();
         //trocar os elementos x e y de lugar
         void trocar_elementos(int x, int y);
 };
@@ -139,7 +140,108 @@ void Dados::conversao()
 
 void Dados::exibir_intervalo(int x, int y){}
 
-void Dados::alterar_elemento(string novo){}
+void Dados::alterar_dado()
+{
+	fstream file ("base.bin", ios::binary | ios::in | ios::out | ios::ate);
+	if (!file.is_open())
+	{
+		cout << "Falha ao abrir o arquivo. " << endl;
+	}
+	else
+	{
+		// OPERAÇÕES PARA CALCULAR A QUANTIDADE DE REGISTROS CONTIDOS NO ARQUIVO
+		streampos fileSize = file.tellg();
+		size_t classSize = sizeof(Dados);
+		size_t numRecords = (fileSize / classSize) - 1; // -1 UTILIZADO PARA DESCONSIDERAR A PRIMEIRA LINHA DO ARQUIVO
+		
+		
+		// GET UMA POSIÇÃO VÁLIDA PARA ALTERAÇÃO
+		int posicaoAlterar;
+		cout << "Digite a posição a se alterar (0 - " << numRecords << ")\n> ";
+		cin >> posicaoAlterar;
+		while (posicaoAlterar < 0 or posicaoAlterar > int(numRecords))
+		{
+			cout << "Digite uma posição válida!\n> ";
+			cin >> posicaoAlterar;
+		}
+		cin.ignore();
+		cin.clear();
+		
+		
+		// CRIA UMA VARIÁVEL PARA RECEBER O REGISTRO A SER ALTERADO
+		Dados d;
+		
+		
+		// POSICIONA O PONTEIRO DE LEITURA PARA A POSIÇÃO DESEJADA PARA ALTERAÇAO
+		file.seekg(posicaoAlterar * sizeof(Dados));
+		file.read((char*)&d, sizeof(Dados));
+		
+		
+		// SWITCH CASE PARA O USER DECIDIR QUAL ATRIBUTO DO REGISTRO IRÁ ALTERAR
+		int opt;
+		do
+		{
+			cout << "\n(1) Alterar Id\n(2) Alterar nome\n(3) Alterar cidade\n(4) Alterar esporte\n(5) Alterar evento\n(6) Alterar noc\n(0) Sair\n> ";
+			cin >> opt;
+			cin.ignore();
+			cin.clear();
+			
+			switch (opt)
+			{
+				case 1:
+					cout << "Entre com o novo Id : ";
+					cin >> d.mId;
+					cin.ignore();
+					cin.clear();
+					break;
+					
+				case 2:
+					cout << "Entre com o novo nome : ";
+					cin.getline(d.mNome, 80);
+					cin.clear();
+					break;
+					
+				case 3:
+					cout << "Entre com a nova cidade : ";
+					cin.getline(d.mCidade, 70);
+					cin.clear();
+					break;
+					
+				case 4:
+					cout << "Entre com o novo esporte : ";
+					cin.getline(d.mEsporte, 70);
+					cin.clear();
+					break;
+					
+				case 5:
+					cout << "Entre com o novo evento : ";
+					cin.getline(d.mEvento, 70);
+					cin.clear();
+					break;
+					
+				case 6:
+					cout << "Entre com a nova sigla do país : ";
+					cin.getline(d.mNoc, 4);
+					cin.clear();
+					
+				case 0:
+					break;
+				
+				default:
+					cout << "Digite um comando válido. \n";
+					break;
+			}
+		} while (opt != 0);
+		
+		
+		// ESCREVE O REGISTRO COM OS DADOS ALTERADOS NA POSIÇÃO DESEJADA
+		file.seekp(posicaoAlterar * sizeof(Dados));
+		file.write((char*)&d, sizeof(Dados));
+		
+		
+		file.close();
+	}
+}
 
 void Dados::trocar_elementos(int x, int y)
 {
@@ -271,14 +373,7 @@ int main()
                 d.exibir_intervalo(x,y);
                 break;
             case 'a':
-                cin.ignore();
-                cout << "Digite a posicao que deseja alterar o nome.\n";
-                cin >> x;
-
-                cin.ignore();
-                cout << "Digite o novo nome que deseja atribuir a posicao " << x << endl;
-                getline(cin,novoNome);
-                d.alterar_elemento(novoNome);
+                d.alterar_dado();
                 break;
             case 't':
                 cin.ignore();
@@ -290,7 +385,7 @@ int main()
                 cin.ignore();
                 d.adicionar();
             default:
-
+		cout << "Digite um comando válido!\n> ";
                 break;
         }
         system(CLEAR.c_str());
