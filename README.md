@@ -87,7 +87,7 @@ Dados::Dados(string id, string Nome, string Cidade, string Esporte, string Event
 
 ## Função de conversão
 Nessa função, o arquivo CSV é lido, descartando a linha inicial. Antes do while, cria-se o ofstream, para que o arquivo binário seja aberto e esteja pronto para a escrita posteriormente.
-Descrevendo de maneira resumida, enquanto o arquivo não chegar ao fim, ele vai ler diferentes strings com o uso do getline e até a vírgula, lembrando que nos cammpos nome e evento, ocorrem algumas exceções quanto à representação dos mesmos, onde aparecem vígulas e aspas dentro de um só campo(sendo que a vígula é o delimitador de cada um).
+Descrevendo de maneira resumida, enquanto o arquivo não chegar ao fim, ele vai ler diferentes strings com o uso do getline e até a vírgula, lembrando que nos campos nome e evento, ocorrem algumas exceções quanto à representação dos mesmos, onde aparecem vígulas e aspas dentro de um só campo(sendo que a vígula é o delimitador de cada um).
 Por fim, criamos um pequeno contador para mostrar a porcentagem de como está o carregamento, tendo em vista que a base possui aproximadamente 271 mil linhas, após isso, o arquivo é fechado e é exibida uma mensagem na tela que o arquivo foi convertido com êxito.
 
 ```cpp
