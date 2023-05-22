@@ -10,6 +10,7 @@
 	#endif
 	```
   - Utilizamos string para manipulação correta da base e posteriormente passar para um vetor char.
+  - Pode ser que ao baixar a base, uma quebra de linha seja adicionada ao final do arquivo, isso pode causar problemas na execução do programa. Caso isso aconteça, recomendamos remover essa linha.
 
 
 ## Bibliotecas
