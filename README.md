@@ -102,7 +102,7 @@ Por fim, criamos um pequeno contador para mostrar a porcentagem de como está o 
 void Dados::conversao()
 {
     //começar a leitura do csv
-    ifstream ler("base15K.csv");
+    ifstream ler("data_athlete_event.csv");
     string LINHA;
     getline(ler, LINHA, '\n');
     //pegar a primeira linha da base <Id,Name,City,Sport,Event,NOC>
