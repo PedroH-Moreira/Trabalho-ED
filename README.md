@@ -2,7 +2,15 @@
 
 ## Observações iniciais
   - Foi preciso utilizar uma constante global para adequar o comando clear a todos os sistemas operacionais.
+  	```cpp
+	#ifdef _WIN32
+   	 const std::string CLEAR = "cls"; // Comando para limpar tela no Windows
+	#else
+   	 const std::string CLEAR = "clear"; // Comando para limpar tela no Linux e macOS
+	#endif
+	```
   - Utilizamos string para manipulação correta da base e posteriormente passar para um vetor char.
+
 
 ## Bibliotecas
 ### Essas foram as bibliotecas utilizadas, para possibilitar:
@@ -85,7 +93,7 @@ Dados::Dados(string id, string Nome, string Cidade, string Esporte, string Event
 }
 ```
 
-## Função de conversão
+## Módulo de conversão
 Nessa função, o arquivo CSV é lido, descartando a linha inicial. Antes do while, cria-se o ofstream, para que o arquivo binário seja aberto e esteja pronto para a escrita posteriormente.
 Descrevendo de maneira resumida, enquanto o arquivo não chegar ao fim, ele vai ler diferentes strings com o uso do getline e até a vírgula, lembrando que nos campos nome e evento, ocorrem algumas exceções quanto à representação dos mesmos, onde aparecem vígulas e aspas dentro de um só campo(sendo que a vígula é o delimitador de cada um).
 Por fim, criamos um pequeno contador para mostrar a porcentagem de como está o carregamento, tendo em vista que a base possui aproximadamente 271 mil linhas, após isso, o arquivo é fechado e é exibida uma mensagem na tela que o arquivo foi convertido com êxito.
@@ -160,7 +168,7 @@ void Dados::conversao()
 }
 ```
 
-## Alterar dado
+## Módulo para alterar dado
 - Nesta função, o arquivo binário é aberto de forma a possibilitar entrada e saída de dados. Posteriormente, foi criada a variável numRecords("quantidade de registros") para contabilizar a quantidade de objetos escritos no arquivo. 
 - A estrutura de repetição while() foi utilizada para garantir que o user digite somente uma posição válida no arquivo.
 - É feito o posicionamento do ponteiro de leitura (seekg) na posição atribuída pelo user, seguido pela alocação dos dados no objeto "d".
@@ -272,6 +280,201 @@ void Dados::alterar_dado()
 	}
 }
 ```
+
+## Módulo para exibir intervalo
+- Deixamos um if else para verificação da abertura correta do arquivo logo no começo, para caso a abertura seja bem sucedida, iniciamos a operação. Nela, configura-se um ponteiro para percorrer até o final do arquivo e verificar o tamanho do mesmo.
+- Após isso, adequa-se o número de linhas pela divisão do tamanho do arquivo pelo tamanho ocupado pela classe.
+- Novamente, com o uso de if else verificamos se o intervalo digitado é de fato válido.
+- Caso ele seja válido, cria-se duas variáveis, posicao_inicial e posicao_final, para indicar de onde até onde deve ser feita a leitura.
+- Por fim, fecha-se o arquivo e dá segmento ao programa.
+
+```cpp
+void Dados::exibir_intervalo(int x, int y)
+{
+    ifstream file ("base.bin", ios_base::in | ios_base:: binary);
+	
+	if (!file.is_open())
+	{
+		cout << "Falha ao abrir o arquivo. " << endl;
+	}
+	else
+	{
+		// OPERAÇÕES PARA CALCULAR A QUANTIDADE DE REGISTROS CONTIDOS NO ARQUIVO
+		file.seekg(0, ios::end);
+		streampos fileSize = file.tellg();
+		size_t classSize = sizeof(Dados);
+		size_t numRecords = (fileSize / classSize) - 1; // -1 UTILIZADO PARA DESCONSIDERAR A PRIMEIRA LINHA DO ARQUIVO
+		
+		if (x > (int)numRecords or y > (int)numRecords or x > y or x < 0 or y < 0)
+		{
+			cout << "Intervalo invalido." << endl;
+			file.close();
+		}
+		else{
+			
+			Dados d;
+			int posicao_inicial = x, posicao_final = x;
+			
+			file.seekg(posicao_inicial * sizeof(Dados));
+			
+			while (file.read((char *)&d, sizeof(Dados)) and posicao_final <= y and posicao_final <= int(numRecords))
+			{
+				cout << "ID: " << d.mId << " Nome: " << d.mNome << " Cidade: " << d.mCidade;
+				cout << " Esporte: " << d.mEsporte << " Evento: " << d.mEvento << " NOC: " << d.mNoc << endl;
+				++posicao_final;
+			}
+			cout << endl;
+		}
+
+		file.close();
+	}
+}
+```
+
+## Módulo de trocar elementos
+- Iniciamos o ponteiro para que possamos direcionar futuramente com os valores fornecidos.
+- Ao criar os dois objetos procura-se os dois por meio de seekg.
+- Em seguida posiciona-se o ponteiro na posição desejada x para que seja inserido o segundo elemento(y) e faz-se o mesmo com y.
+- Após a escrita de ambos, o arquivo é fechado e indicamos ao usuário que a troca foi feita com sucesso.
+
+```cpp
+void Dados::trocar_elementos()
+{
+    fstream file("base.bin", ios_base::binary | ios_base::ate | ios_base:: in | ios_base::out);
+    int posx, posy;
+    cout << "Digite a posicoes em que deseja fazer a troca\n";
+    cout << "x > ";
+    cin >> posx; cout << endl;
+    cout << "y > ";
+    cin >> posy; cout << endl;
+    cin.ignore();
+
+    Dados aux1;
+    Dados aux2;
+
+    file.seekg(posx * sizeof(Dados));
+    file.read((char*)&aux1, sizeof(Dados));
+
+    file.seekg(posy * sizeof(Dados));
+    file.read((char*)&aux2, sizeof(Dados));
+
+    file.seekp(posx * sizeof(Dados));
+    file.write((char*)&aux2, sizeof(Dados));
+
+    file.seekp(posy * sizeof(Dados));
+    file.write((char*)&aux1, sizeof(Dados));
+    file.close();
+    cout << "Troca feita com sucesso!\n";
+}
+```
+
+## Módulo para adicionar elementos
+- Criamos um ponteiro utilizando ios::ate para inserir na posição desejada.
+- Com o uso do if else verificamos a abertura do arquivo.
+- Após isso calculamos a quantidade de registros.
+- Usamos un cin com while para garantir que o usuário digite uma posição válida.
+- Criamos um registro para receber os dados e posteriormente a inserção dos dados desejados.
+- Após assimilar os dados ao objeto, posicionamos o ponteiro ao final do arquivo e adicionamos uma posição a cada elemento para que o objeto seja adicionado com êxito.
+- Fechamos o arquivo e finalizamos o módulo.
+
+
+## Módulo de apresentação
+Basicamente uma descrição detalhada das pessoas envolvidas no trabalho.
+```cpp
+void apresentacao()
+{
+    cout << " - - - - - - - - - TRABALHO DE ED - - - - - - - - - \n";
+    cout << "Segundo periodo --- Universidade Federal de Lavras \n";
+    cout << "Participantes: Esther Silva de Magalhaes, \n";
+    cout << "Italo Alves Rabelo, \n";
+    cout << "Pedro Henrique Cabral Moreira. \n";
+    cout << "Professor: Renato Ramos da Silva \n";
+    cout << "Base de dados: \"data_athlete_event\"\n";
+    cout << "Digite enter para comecar \n";
+    char c; cin.get(c);
+    system(CLEAR.c_str());
+}
+```
+
+## Int main
+- Caso o arquivo binário já exista ele será apagado, para que não exista uma sopreposição de dados.
+- Logo em seguida, é feita a apresentação, detalhando os envolvidos no trabalho.
+- Chamamos o módulo de conversão para que o usuário possa fazer as manipulações desejadas no arquivo binário
+### Organização
+- Utilizamos um loop com a condição de key != s para que o programa continue rodando caso o usuário não queira sair e usamos um switch dentro dele em prol de adequar cada comando à sua função.
+- Além disso, como foi citado nas bibliotecas, utilizamos o clear ou cls para deixar o terminal "clean" durante a execução.
+- Por fim, como deafult do switch colocamos uma saída para pedir que o usuário digite um comando válido e caso o comando seja s, o programa é então encerrado.
+
+```cpp
+int main()
+{
+    if("base.bin")
+        remove("base.bin");
+
+    apresentacao();
+    Dados d;
+    d.conversao();
+    char key = 'l';
+
+    while(key != 's')
+    {
+	cout << "\n\n==================== MENU =====================\n\n";
+        cout << "Escolha a funcao desejada: \n";
+        cout << "e - Exibir todo o arquivo.\n";
+        cout << "i - Exibir um intervalo especifico do arquivo.\n";
+        cout << "a - Alterar elemento.\n";
+        cout << "t - Trocar elementos.\n";
+        cout << "d - Adicionar elemento.\n";
+        cout << "s - Fechar o programa.\n";
+        cin >> key;
+        string novoNome;
+        int x, y;
+        system(CLEAR.c_str());
+        switch(key)
+        {
+            case 'e':
+                d.exibir();
+                break;
+            case 'i':
+                cout << "\nDigite o intervalo desejado:\n\n" <<
+                        "{" << 
+                        " Exemplo: intervalo de 5 a 15\n" <<
+                        "  x = 5\n" <<
+                        "  y = 15\n" <<
+                        "}\n\n" <<
+                        "Insira abaixo:\n";
+                cout << "x = "; cin >> x;
+                cout << "y = "; cin >> y;
+                cout << "\n\n";
+                cin.ignore();
+                d.exibir_intervalo(x,y);
+                break;
+            case 'a':
+                d.alterar_dado();
+                break;
+            case 't':
+                cin.ignore();
+                d.trocar_elementos();
+                break;
+            case 'd':
+                cin.ignore();
+                d.adicionar();
+                break;
+            case 's':
+                break;
+            default:
+				cout << "Digite um comando válido!\n> ";
+                break;
+        }
+    }
+
+    cout << "\nPrograma encerrado.";
+    return 0;
+}
+```
+
+
+
 
 
 
