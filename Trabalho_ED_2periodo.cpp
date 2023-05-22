@@ -389,8 +389,6 @@ void Dados::trocar_elementos()
     cout << "Troca feita com sucesso!\n";
 }
 
-
-
 void apresentacao()
 {
     cout << " - - - - - - - - - TRABALHO DE ED - - - - - - - - - \n";
