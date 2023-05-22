@@ -58,24 +58,6 @@ Dados::Dados(string id, string Nome, string Cidade, string Esporte, string Event
     strcpy(this->mNoc, Noc.c_str());
 }
 
-void Dados::exibir()
-{
-    ifstream fin;
-    fin.open("base.bin" , ios_base::in | ios_base::binary);
-    Dados d;
-
-    while ((fin.read((char *)&d, sizeof(Dados))))
-    {
-        cout << "ID: " << d.mId << " Nome: " << d.mNome << " Cidade: " << d.mCidade;
-        cout << " Esporte: " << d.mEsporte << " Evento: " << d.mEvento << " NOC: " << d.mNoc << endl;
-    }
-    fin.close();
-    //remove ("base.bin");
-    //cout << "Digite enter para continuar\n";
-    //char c; cin.get(c);
-    //system(CLEAR.c_str());
-}
-
 void Dados::conversao()
 {
     //começar a leitura do csv
@@ -144,6 +126,24 @@ void Dados::conversao()
     cout << "Arquivo CSV convertido para binario com sucesso\n";
 }
 
+void Dados::exibir()
+{
+    ifstream fin;
+    fin.open("base.bin" , ios_base::in | ios_base::binary);
+    Dados d;
+
+    while ((fin.read((char *)&d, sizeof(Dados))))
+    {
+        cout << "ID: " << d.mId << " Nome: " << d.mNome << " Cidade: " << d.mCidade;
+        cout << " Esporte: " << d.mEsporte << " Evento: " << d.mEvento << " NOC: " << d.mNoc << endl;
+    }
+    fin.close();
+    //remove ("base.bin");
+    //cout << "Digite enter para continuar\n";
+    //char c; cin.get(c);
+    //system(CLEAR.c_str());
+}
+
 void Dados::exibir_intervalo(int x, int y)
 {
     ifstream file ("base.bin", ios_base::in | ios_base:: binary);
@@ -182,6 +182,78 @@ void Dados::exibir_intervalo(int x, int y)
 		}
 
 		file.close();
+	}
+}
+
+void Dados::adicionar()
+{
+	fstream file ("base.bin", ios::binary | ios::in | ios::out | ios::ate);
+	if (!file.is_open())
+	{
+		cout << "Falha ao abrir o arquivo. " << endl;
+	}
+	else
+	{
+		// OPERAÇÕES PARA CALCULAR A QUANTIDADE DE REGISTROS CONTIDOS NO ARQUIVO
+		streampos fileSize = file.tellg();
+		size_t classSize = sizeof(Dados);
+		size_t numRecords = (fileSize / classSize) - 1; // -1 UTILIZADO PARA DESCONSIDERAR A PRIMEIRA LINHA DO ARQUIVO
+		
+		// GET UMA POSIÇÃO VÁLIDA PARA INSERÇÃO
+		int posicaoAInserir;
+		cout << "Digite a posicao a inserir um novo registro (0 - " << numRecords << ") : ";
+		cin >> posicaoAInserir;
+		while (posicaoAInserir < 0 or posicaoAInserir > int(numRecords))
+		{
+			cout << "Digite uma posicao valida!\n> ";
+			cin >> posicaoAInserir;
+		}
+		
+		// CRIA O REGISTRO E RECEBE OS DADOS
+		Dados d;
+		
+		cout << "Digite o Id do atleta: ";
+		cin >> d.mId;
+		cin.ignore();
+		cin.clear();
+		
+		cout << "Digite o nome do atleta: ";
+		cin.getline(d.mNome, 80);
+		cin.clear();
+		
+		cout << "Digite a cidade do atleta: ";
+		cin.getline(d.mCidade, 70);
+		cin.clear();
+		
+		cout << "Digite o esporte praticado pelo atleta: ";
+		cin.getline(d.mEsporte, 70);
+		cin.clear();
+		
+		cout << "Digite o evento que o atleta participa: ";
+		cin.getline(d.mEvento, 70);
+		cin.clear();
+		
+		cout << "Digite a sigla do pais do atleta: ";
+		cin.getline(d.mNoc, 4);
+		cin.clear();
+		
+		// CRIA UMA AUXILIAR PARA RECEBER OS REGISTROS UM A UM
+		Dados aux;
+		
+		// POSICIONA O PONTEIRO DE LEITURA E DE ESCRITA AO FINAL DO ARQUIVO - REALIZA A LEITURA - ESCREVE O REGISTRO UMA POSIÇÃO A FRENTE ATÉ QUE SE ATINJA A POSIÇÃO DE INSERÇÃO
+		for (int i = numRecords; i >= posicaoAInserir; i--)
+		{
+			file.seekg(i*sizeof(Dados));
+			file.read((char*)&aux, sizeof(Dados));
+			file.seekp((i+1)*sizeof(Dados));
+			file.write((char*)&aux, sizeof(Dados));
+		}
+		
+		file.seekp(posicaoAInserir*sizeof(Dados));
+		file.write((char*)&d, sizeof(Dados));
+		
+		file.close();
+		
 	}
 }
 
@@ -317,77 +389,7 @@ void Dados::trocar_elementos()
     cout << "Troca feita com sucesso!\n";
 }
 
-void Dados::adicionar()
-{
-	fstream file ("base.bin", ios::binary | ios::in | ios::out | ios::ate);
-	if (!file.is_open())
-	{
-		cout << "Falha ao abrir o arquivo. " << endl;
-	}
-	else
-	{
-		// OPERAÇÕES PARA CALCULAR A QUANTIDADE DE REGISTROS CONTIDOS NO ARQUIVO
-		streampos fileSize = file.tellg();
-		size_t classSize = sizeof(Dados);
-		size_t numRecords = (fileSize / classSize) - 1; // -1 UTILIZADO PARA DESCONSIDERAR A PRIMEIRA LINHA DO ARQUIVO
-		
-		// GET UMA POSIÇÃO VÁLIDA PARA INSERÇÃO
-		int posicaoAInserir;
-		cout << "Digite a posicao a inserir um novo registro (0 - " << numRecords << ") : ";
-		cin >> posicaoAInserir;
-		while (posicaoAInserir < 0 or posicaoAInserir > int(numRecords))
-		{
-			cout << "Digite uma posicao valida!\n> ";
-			cin >> posicaoAInserir;
-		}
-		
-		// CRIA O REGISTRO E RECEBE OS DADOS
-		Dados d;
-		
-		cout << "Digite o Id do atleta: ";
-		cin >> d.mId;
-		cin.ignore();
-		cin.clear();
-		
-		cout << "Digite o nome do atleta: ";
-		cin.getline(d.mNome, 80);
-		cin.clear();
-		
-		cout << "Digite a cidade do atleta: ";
-		cin.getline(d.mCidade, 70);
-		cin.clear();
-		
-		cout << "Digite o esporte praticado pelo atleta: ";
-		cin.getline(d.mEsporte, 70);
-		cin.clear();
-		
-		cout << "Digite o evento que o atleta participa: ";
-		cin.getline(d.mEvento, 70);
-		cin.clear();
-		
-		cout << "Digite a sigla do pais do atleta: ";
-		cin.getline(d.mNoc, 4);
-		cin.clear();
-		
-		// CRIA UMA AUXILIAR PARA RECEBER OS REGISTROS UM A UM
-		Dados aux;
-		
-		// POSICIONA O PONTEIRO DE LEITURA E DE ESCRITA AO FINAL DO ARQUIVO - REALIZA A LEITURA - ESCREVE O REGISTRO UMA POSIÇÃO A FRENTE ATÉ QUE SE ATINJA A POSIÇÃO DE INSERÇÃO
-		for (int i = numRecords; i >= posicaoAInserir; i--)
-		{
-			file.seekg(i*sizeof(Dados));
-			file.read((char*)&aux, sizeof(Dados));
-			file.seekp((i+1)*sizeof(Dados));
-			file.write((char*)&aux, sizeof(Dados));
-		}
-		
-		file.seekp(posicaoAInserir*sizeof(Dados));
-		file.write((char*)&d, sizeof(Dados));
-		
-		file.close();
-		
-	}
-}
+
 
 void apresentacao()
 {
