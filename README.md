@@ -168,6 +168,25 @@ void Dados::conversao()
 }
 ```
 
+## Módulo exibir
+Como o próprio nome diz, usamos um loop com condição de não fim, para que vá até o final do arquivo imprimindo todos os dados.
+```cpp
+void Dados::exibir()
+{
+    ifstream fin;
+    fin.open("base.bin" , ios_base::in | ios_base::binary);
+    Dados d;
+
+    while ((fin.read((char *)&d, sizeof(Dados))))
+    {
+        cout << "ID: " << d.mId << " Nome: " << d.mNome << " Cidade: " << d.mCidade;
+        cout << " Esporte: " << d.mEsporte << " Evento: " << d.mEvento << " NOC: " << d.mNoc << endl;
+    }
+    fin.close();
+}
+``` 
+
+
 ## Módulo para alterar dado
 - Nesta função, o arquivo binário é aberto de forma a possibilitar entrada e saída de dados. Posteriormente, foi criada a variável numRecords("quantidade de registros") para contabilizar a quantidade de objetos escritos no arquivo. 
 - A estrutura de repetição while() foi utilizada para garantir que o user digite somente uma posição válida no arquivo.
