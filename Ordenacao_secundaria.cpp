@@ -713,7 +713,7 @@ void Dados::mergeSortExterno()
             remove(("data_athlete_event" + to_string(i) + ".bin").c_str());
 
         cout << "Deseja exibir o arquivo?\n";
-        cout << "s ou n\n";
+        cout << "Digite 's' para sim ou 'n' para nao\n";
         char key;
         cin >> key;
         if(key == 's')
