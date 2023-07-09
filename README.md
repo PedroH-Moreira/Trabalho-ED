@@ -493,7 +493,7 @@ int main()
 }
 ```
 ## divideArquivo()
-Este método foi utilizado para dividir o arquivo principal "data_athlete_event.bin" em subarquivos menores com 50.000 registros cada, de modo a evitar a sobrecarga da memória principal ao realizar a ordenação.
+Este método foi utilizado para dividir o arquivo principal "data_athlete_event.bin" em subarquivos menores com 50.000 registros cada, de modo a evitar a sobrecarga da memória principal ao realizar-se a ordenação.
 
 ```cpp
 void Dados::divideArquivo(int &numeroArquivos) 
@@ -543,8 +543,239 @@ void Dados::divideArquivo(int &numeroArquivos)
     cout << "Arquivo dividido em " << numeroArquivos << " arquivos!" << endl;
 }
 ```
+##intercala()
+Função utilizada para alternar dois vetores utilizando-se os atributos "city" e "id", respectivamente, como chaves de ordenação no método Merge Sort.
+```cpp
+void Dados::divideArquivo(int &numeroArquivos) 
+{
+    //esse metodo vai dividir o arquivo data_athlete_event.bin em varios arquivos menores
+    cout << "Dividindo o arquivo..." << endl;
+    ifstream arquivo;
+    arquivo.open("base.bin", ios::binary);
+    if (arquivo.is_open()) 
+    {
+        //calcula o numero de arquivos menores
+        arquivo.seekg(0, ios::end);
+        int numeroDados = arquivo.tellg() / sizeof(Dados);
+        arquivo.seekg(sizeof(Dados), ios::beg);
+        numeroArquivos = (numeroDados / 50000) + 1;
+        //cria os arquivos
+        for (int i = 0; i < numeroArquivos; i++) 
+        {
+            ofstream arquivo;
+            arquivo.open("data_athlete_event" + to_string(i) + ".bin", ios::binary);
+            arquivo.close();
+        }
+        //le os dados do arquivo original e escreve nos arquivos menores
+        for (int i = 0; i < numeroArquivos; i++) 
+        {
+            int j = 0;
+            while(arquivo.good() and j < 50000) 
+            {
+                Dados dado;
+                arquivo.read((char*)&dado, sizeof(Dados));
+                ofstream arquivo;
+                arquivo.open("data_athlete_event" + to_string(i) + ".bin", ios::binary | ios::app);
+                if (arquivo.is_open()) 
+                {
+                    arquivo.write((char*)&dado, sizeof(Dados));
+                    arquivo.close();
+                } else {
+                    cout << "Erro ao abrir o arquivo auxiliar: " << i << endl;
+                }
+                j++;
+            }
+        }
+        arquivo.close();
+    } else {
+        cout << "Erro ao abrir o arquivo na divisao" << endl;
+    }
+    cout << "Arquivo dividido em " << numeroArquivos << " arquivos!" << endl;
+}
+```
 
+##ordenaArquivos()
+Esta função realiza a ordenação dos subarquivos menores a partir dos atributos "city" e "id" respectivamente.
+```cpp
+void Dados::ordenaArquivos(int numeroArquivos, int inicio, int fim) 
+{
+    //esse metodo vai ordenar os arquivos auxiliares
+    Dados *vetor = new Dados[50000];
+    for (int i = 0; i < numeroArquivos; i++) 
+    {
+        for (int j = 0; j < 50000; j++) 
+        {
+            vetor[j].limpaDados();
+        }
+        ifstream arquivo;
+        arquivo.open("data_athlete_event" + to_string(i) + ".bin", ios::binary);
+        if (arquivo.is_open()) 
+        {
+            for (int j = 0; j < 50000; j++) 
+            {
+                arquivo.read((char*)&vetor[j], sizeof(Dados));
+            }
+            //ordenar o vetor
+            mergeSort(vetor, inicio, fim);
+            arquivo.close();
+            //abrir o arquivo para escrever
+            ofstream arquivo;
+            arquivo.open("data_athlete_event" + to_string(i) + ".bin", ios::binary);
+            if (arquivo.is_open()) 
+            {
+                //escrever o vetor ordenado no arquivo
+                arquivo.seekp(0, ios::beg);
+                for (int j = 0; j < 50000; j++) 
+                {
+                    if (vetor[j].mEvento[0] != '\0') 
+                    {
+                        arquivo.write((char*)&vetor[j], sizeof(Dados));
+                    }
+                }
+                arquivo.close();
+                cout << "Arquivo " << i << " ordenado!" << endl;
+            } else {
+                cout << "Erro ao abrir o arquivo auxiliar: " << i << "para escrever na ordenacao" << endl;
+            }
+        } else {
+            cout << "Erro ao abrir o arquivo auxiliar: " << i << "para ler na ordenacao" << endl;
+        }
+    }
+}
+```
 
+##mesclaArquivos()
+Método designado para reescrever os subarquivos já ordenados no arquivo binário principal.
+```cpp
+void Dados::mesclaArquivos(int numeroArquivos) 
+{
+    //esse metodo vai mesclar os arquivos auxiliares em um arquivo final
+    int indices[numeroArquivos];
+    for (int i = 0; i < numeroArquivos; i++) 
+    {
+        indices[i] = 0;
+    }
+    //abrir os arquivos auxiliares
+    ifstream arquivos[numeroArquivos];
+    for (int i = 0; i < numeroArquivos; i++) 
+    {
+        arquivos[i].open("data_athlete_event" + to_string(i) + ".bin", ios::binary);
+        if (!arquivos[i].is_open()) 
+        {
+            cout << "Erro ao abrir o arquivo auxiliar: " << i << "na mescla" << endl;
+        }
+    }
+    //abrir o arquivo final
+    ofstream arquivoFinal;
+    arquivoFinal.open("data_athlete_event_final.bin", ios::binary);
+    if (!arquivoFinal.is_open()) 
+    {
+        cout << "Erro ao abrir o arquivo final na mescla" << endl;
+        return;
+    }
+    //mesclar os arquivos auxiliares 
+    bool arquivosAbertos = true;
+    while (arquivosAbertos) {
+        arquivosAbertos = false;
+        Dados menor;
+        int indiceMenor = -1;
+        for (int i = 0; i < numeroArquivos; i++) 
+        {
+            arquivos[i].seekg(0, ios::end);
+            int tamanho = arquivos[i].tellg() / sizeof(Dados);
+            arquivos[i].seekg(0, ios::beg);
+            if (indices[i] < tamanho) 
+            {
+                arquivosAbertos = true;
+                Dados aux;
+                arquivos[i].seekg(indices[i] * sizeof(Dados), ios::beg);
+                arquivos[i].read((char*)&aux, sizeof(Dados));
+                if (indiceMenor == -1) 
+                {
+                    menor = aux;
+                    indiceMenor = i;
+                } else {
+                    string e1 = aux.mEvento;
+                    string e2 = menor.mEvento;
+                    string evento1 = (e1[0] == '"') ? e1.substr(1) : e1;
+                    string evento2 = (e2[0] == '"') ? e2.substr(1) : e2;
+
+                    //string evento1 = aux.mEvento;
+                    //string evento2 = menor.mEvento;
+                    //compara os eventos dos dados
+                    if (evento1 < evento2) 
+                    {
+                        //se o evento do vetor da esquerda for menor, pega o proximo do vetor da esquerda
+                        menor = aux;
+                        indiceMenor = i;
+                    } else if (evento1 > evento2) {
+                        //se o evento do vetor da direita for menor, pega o proximo do vetor da direita
+                    } else {
+                        //se os eventos forem iguais, compara os IDs
+                        if (aux.mId < menor.mId) {
+                            //se o ID do vetor da esquerda for menor, pega o proximo do vetor da esquerda
+                            menor = aux;
+                            indiceMenor = i;
+                        } else {
+                            //se o ID do vetor da direita for menor, pega o proximo do vetor da direita
+                        }
+                    }
+                }
+            }
+        }
+        if (indiceMenor != -1) 
+        {
+            arquivoFinal.write((char*)&menor, sizeof(Dados));
+            indices[indiceMenor]++;
+        }
+    }
+    //fechar os arquivos
+    for (int i = 0; i < numeroArquivos; i++) 
+    {
+        arquivos[i].close();
+    }
+    arquivoFinal.close();
+    cout << "Arquivos mesclados, arquivo final gerado com sucesso!" << endl;
+
+```
+
+##mergeSortExterno()
+Função que realiza a chamada de todas os métodos descritos acima para realizar o ordenação em memória secundária do arquivo binário ("data_athlete_event.bin").
+```cpp
+void Dados::mergeSortExterno() 
+{
+    //esse metodo vai chamar os metodos necessarios para ordenar o arquivo
+    int numeroArquivos;
+    divideArquivo(numeroArquivos);
+    if (numeroArquivos > 1) 
+    {
+        ordenaArquivos(numeroArquivos, 0, 49999);
+        mesclaArquivos(numeroArquivos);
+        for (int i = 0; i < numeroArquivos; i++)
+            remove(("data_athlete_event" + to_string(i) + ".bin").c_str());
+
+        cout << "Deseja exibir o arquivo?\n";
+        cout << "s ou n\n";
+        char key;
+        cin >> key;
+        if(key == 's')
+        {
+            exibirOrdenado();
+        }
+        key = 'k';
+        cout << "Deseja converter o arquivo para CSV ?\n";
+        cout << "Digite 's' para sim ou 'n' para nao\n";
+        cin >> key;
+        if(key == 's')
+        {
+            system(CLEAR.c_str());
+            ordenadoParaCsv();
+        }
+    } else {
+        cout << "Arquivo pequeno demais" << endl;
+    }
+}
+```
 
 
 
