@@ -415,83 +415,6 @@ void apresentacao()
     system(CLEAR.c_str());
 }
 ```
-
-## Int main
-- Caso o arquivo binário já exista ele será apagado, para que não exista uma sopreposição de dados.
-- Logo em seguida, é feita a apresentação, detalhando os envolvidos no trabalho.
-- Chamamos o módulo de conversão para que o usuário possa fazer as manipulações desejadas no arquivo binário
-### Organização
-- Utilizamos um loop com a condição de key != s para que o programa continue rodando caso o usuário não queira sair e usamos um switch dentro dele em prol de adequar cada comando à sua função.
-- Além disso, como foi citado nas bibliotecas, utilizamos o clear ou cls para deixar o terminal "clean" durante a execução.
-- Por fim, como deafult do switch colocamos uma saída para pedir que o usuário digite um comando válido e caso o comando seja s, o programa é então encerrado.
-
-```cpp
-int main()
-{
-    if("base.bin")
-        remove("base.bin");
-
-    apresentacao();
-    Dados d;
-    d.conversao();
-    char key = 'l';
-
-    while(key != 's')
-    {
-	cout << "\n\n==================== MENU =====================\n\n";
-        cout << "Escolha a funcao desejada: \n";
-        cout << "e - Exibir todo o arquivo.\n";
-        cout << "i - Exibir um intervalo especifico do arquivo.\n";
-        cout << "a - Alterar elemento.\n";
-        cout << "t - Trocar elementos.\n";
-        cout << "d - Adicionar elemento.\n";
-        cout << "s - Fechar o programa.\n";
-        cin >> key;
-        string novoNome;
-        int x, y;
-        system(CLEAR.c_str());
-        switch(key)
-        {
-            case 'e':
-                d.exibir();
-                break;
-            case 'i':
-                cout << "\nDigite o intervalo desejado:\n\n" <<
-                        "{" << 
-                        " Exemplo: intervalo de 5 a 15\n" <<
-                        "  x = 5\n" <<
-                        "  y = 15\n" <<
-                        "}\n\n" <<
-                        "Insira abaixo:\n";
-                cout << "x = "; cin >> x;
-                cout << "y = "; cin >> y;
-                cout << "\n\n";
-                cin.ignore();
-                d.exibir_intervalo(x,y);
-                break;
-            case 'a':
-                d.alterar_dado();
-                break;
-            case 't':
-                cin.ignore();
-                d.trocar_elementos();
-                break;
-            case 'd':
-                cin.ignore();
-                d.adicionar();
-                break;
-            case 's':
-                break;
-            default:
-				cout << "Digite um comando válido!\n> ";
-                break;
-        }
-    }
-
-    cout << "\nPrograma encerrado.";
-    return 0;
-}
-```
 ## divideArquivo()
 Este método foi utilizado para dividir o arquivo principal "data_athlete_event.bin" em subarquivos menores com 50.000 registros cada, de modo a evitar a sobrecarga da memória principal ao realizar-se a ordenação.
 
@@ -543,7 +466,7 @@ void Dados::divideArquivo(int &numeroArquivos)
     cout << "Arquivo dividido em " << numeroArquivos << " arquivos!" << endl;
 }
 ```
-##intercala()
+## intercala()
 Função utilizada para alternar dois vetores utilizando-se os atributos "city" e "id", respectivamente, como chaves de ordenação no método Merge Sort.
 ```cpp
 void Dados::divideArquivo(int &numeroArquivos) 
@@ -594,7 +517,7 @@ void Dados::divideArquivo(int &numeroArquivos)
 }
 ```
 
-##ordenaArquivos()
+## ordenaArquivos()
 Esta função realiza a ordenação dos subarquivos menores a partir dos atributos "city" e "id" respectivamente.
 ```cpp
 void Dados::ordenaArquivos(int numeroArquivos, int inicio, int fim) 
@@ -644,7 +567,7 @@ void Dados::ordenaArquivos(int numeroArquivos, int inicio, int fim)
 }
 ```
 
-##mesclaArquivos()
+## mesclaArquivos()
 Método designado para reescrever os subarquivos já ordenados no arquivo binário principal.
 ```cpp
 void Dados::mesclaArquivos(int numeroArquivos) 
@@ -739,7 +662,7 @@ void Dados::mesclaArquivos(int numeroArquivos)
 
 ```
 
-##mergeSortExterno()
+## mergeSortExterno()
 Função que realiza a chamada de todas os métodos descritos acima para realizar o ordenação em memória secundária do arquivo binário ("data_athlete_event.bin").
 ```cpp
 void Dados::mergeSortExterno() 
@@ -774,6 +697,83 @@ void Dados::mergeSortExterno()
     } else {
         cout << "Arquivo pequeno demais" << endl;
     }
+}
+```
+
+## Int main
+- Caso o arquivo binário já exista ele será apagado, para que não exista uma sopreposição de dados.
+- Logo em seguida, é feita a apresentação, detalhando os envolvidos no trabalho.
+- Chamamos o módulo de conversão para que o usuário possa fazer as manipulações desejadas no arquivo binário
+### Organização
+- Utilizamos um loop com a condição de key != s para que o programa continue rodando caso o usuário não queira sair e usamos um switch dentro dele em prol de adequar cada comando à sua função.
+- Além disso, como foi citado nas bibliotecas, utilizamos o clear ou cls para deixar o terminal "clean" durante a execução.
+- Por fim, como deafult do switch colocamos uma saída para pedir que o usuário digite um comando válido e caso o comando seja s, o programa é então encerrado.
+
+```cpp
+int main()
+{
+    if("base.bin")
+        remove("base.bin");
+
+    apresentacao();
+    Dados d;
+    d.conversao();
+    char key = 'l';
+
+    while(key != 's')
+    {
+	cout << "\n\n==================== MENU =====================\n\n";
+        cout << "Escolha a funcao desejada: \n";
+        cout << "e - Exibir todo o arquivo.\n";
+        cout << "i - Exibir um intervalo especifico do arquivo.\n";
+        cout << "a - Alterar elemento.\n";
+        cout << "t - Trocar elementos.\n";
+        cout << "d - Adicionar elemento.\n";
+        cout << "s - Fechar o programa.\n";
+        cin >> key;
+        string novoNome;
+        int x, y;
+        system(CLEAR.c_str());
+        switch(key)
+        {
+            case 'e':
+                d.exibir();
+                break;
+            case 'i':
+                cout << "\nDigite o intervalo desejado:\n\n" <<
+                        "{" << 
+                        " Exemplo: intervalo de 5 a 15\n" <<
+                        "  x = 5\n" <<
+                        "  y = 15\n" <<
+                        "}\n\n" <<
+                        "Insira abaixo:\n";
+                cout << "x = "; cin >> x;
+                cout << "y = "; cin >> y;
+                cout << "\n\n";
+                cin.ignore();
+                d.exibir_intervalo(x,y);
+                break;
+            case 'a':
+                d.alterar_dado();
+                break;
+            case 't':
+                cin.ignore();
+                d.trocar_elementos();
+                break;
+            case 'd':
+                cin.ignore();
+                d.adicionar();
+                break;
+            case 's':
+                break;
+            default:
+				cout << "Digite um comando válido!\n> ";
+                break;
+        }
+    }
+
+    cout << "\nPrograma encerrado.";
+    return 0;
 }
 ```
 
