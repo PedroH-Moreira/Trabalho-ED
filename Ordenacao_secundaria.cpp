@@ -40,7 +40,10 @@ class Dados
         void mergeSortExterno();
         void limpaDados();
         void exibirOrdenado();
+        void ordenadoParaCsv();
 };
+
+//tipo específico para comparar corretamente as strings, visto que os eventos podem começar com "
 
 Dados::Dados()
 {
@@ -411,6 +414,27 @@ void apresentacao()
     system(CLEAR.c_str());
 }
 
+void Dados::ordenadoParaCsv()
+{
+    ifstream fin;
+    fin.open("data_athlete_event_final.bin" , ios_base::in | ios_base::binary);
+    if(!fin.is_open())
+    {
+        throw runtime_error("Arquivo data_athlete_event_final.bin não encontrado!\n");
+    }
+    Dados d;
+
+    ofstream saida("arquivoOrdenado.csv");
+    
+    while ((fin.read((char *)&d, sizeof(Dados))))
+    {
+        saida << d.mEvento << "," << d.mNome << "," << d.mCidade << ",";
+        saida << d.mEsporte << "," << d.mId << "," << d.mNoc << endl;
+    }
+    fin.close();
+    saida.close();
+}
+
 void Dados::divideArquivo(int &numeroArquivos) 
 {
     //esse metodo vai dividir o arquivo data_athlete_event.bin em varios arquivos menores
@@ -423,7 +447,7 @@ void Dados::divideArquivo(int &numeroArquivos)
         arquivo.seekg(0, ios::end);
         int numeroDados = arquivo.tellg() / sizeof(Dados);
         arquivo.seekg(sizeof(Dados), ios::beg);
-        numeroArquivos = (numeroDados / 10) + 1;
+        numeroArquivos = (numeroDados / 50000) + 1;
         //cria os arquivos
         for (int i = 0; i < numeroArquivos; i++) 
         {
@@ -435,7 +459,7 @@ void Dados::divideArquivo(int &numeroArquivos)
         for (int i = 0; i < numeroArquivos; i++) 
         {
             int j = 0;
-            while(arquivo.good() and j < 10) 
+            while(arquivo.good() and j < 50000) 
             {
                 Dados dado;
                 arquivo.read((char*)&dado, sizeof(Dados));
@@ -465,15 +489,10 @@ void Dados::intercala(Dados *vetor, int inicio, int meio, int fim) {
     Dados *vetorAuxiliar = new Dados[tamanho];
     for(int k = 0; k < tamanho; k++) {
         if ((i <= meio) and (j <= fim)) {
-			
-			string evento1 = vetor[i].mEvento;
-			string evento2 = vetor[j].mEvento;
-
-			if(vetor[i].mEvento[0] == '"')
-				evento1 = evento1.substr(1); // Obtém a substring a partir do segundo caractere
-			if(vetor[j].mEvento[0] == '"')
-                evento2 = evento2.substr(1); // Obtém a substring a partir do segundo caractere
-
+            string e1 = vetor[i].mEvento;
+            string e2 = vetor[j].mEvento;
+            string evento1 = (e1[0] == '"') ? e1.substr(1) : e1;
+            string evento2 = (e2[0] == '"') ? e2.substr(1) : e2;
             //compara o evento dos dados
             if (evento1 < evento2) {
                 //se o evento do vetor da esquerda for menor, pega o proximo do vetor da esquerda
@@ -638,8 +657,13 @@ void Dados::mesclaArquivos(int numeroArquivos)
                     menor = aux;
                     indiceMenor = i;
                 } else {
-                    string evento1 = aux.mEvento;
-                    string evento2 = menor.mEvento;
+                    string e1 = aux.mEvento;
+                    string e2 = menor.mEvento;
+                    string evento1 = (e1[0] == '"') ? e1.substr(1) : e1;
+                    string evento2 = (e2[0] == '"') ? e2.substr(1) : e2;
+
+                    //string evento1 = aux.mEvento;
+                    //string evento2 = menor.mEvento;
                     //compara os eventos dos dados
                     if (evento1 < evento2) 
                     {
@@ -688,13 +712,22 @@ void Dados::mergeSortExterno()
         for (int i = 0; i < numeroArquivos; i++)
             remove(("data_athlete_event" + to_string(i) + ".bin").c_str());
 
-        cout << "\nDeseja exibir o arquivo?\n";
-        cout << "Aperte a tecla 's' para sim e 'n' para nao\n";
+        cout << "Deseja exibir o arquivo?\n";
+        cout << "s ou n\n";
         char key;
         cin >> key;
         if(key == 's')
         {
             exibirOrdenado();
+        }
+        key = 'k';
+        cout << "Deseja converter o arquivo para CSV ?\n";
+        cout << "Digite 's' para sim ou 'n' para nao\n";
+        cin >> key;
+        if(key == 's')
+        {
+            system(CLEAR.c_str());
+            ordenadoParaCsv();
         }
     } else {
         cout << "Arquivo pequeno demais" << endl;
@@ -705,18 +738,19 @@ void Dados::exibirOrdenado()
 {
     ifstream fin;
     fin.open("data_athlete_event_final.bin" , ios_base::in | ios_base::binary);
+    if(!fin.is_open())
+    {
+        throw runtime_error("Arquivo ordenado não encontrado.\n");
+    }
     Dados d;
 
     while ((fin.read((char *)&d, sizeof(Dados))))
     {
-        cout << "ID: " << d.mId << " Nome: " << d.mNome << " Cidade: " << d.mCidade;
-        cout << " Esporte: " << d.mEsporte << " Evento: " << d.mEvento << " NOC: " << d.mNoc << endl;
+        cout << "Evento: " << d.mEvento << " Nome: " << d.mNome << " Cidade: " << d.mCidade;
+        cout << " Esporte: " << d.mEsporte << " ID: " << d.mId << " NOC: " << d.mNoc << endl;
     }
     fin.close();
-    //remove ("base.bin");
-    //cout << "Digite enter para continuar\n";
-    //char c; cin.get(c);
-    //system(CLEAR.c_str());
+
 
 }
 
@@ -725,6 +759,12 @@ int main()
 {
     if("base.bin")
         remove("base.bin");
+
+    if("data_athlete_event_final.bin")
+        remove("data_athlete_event_final.bin");
+
+    if("arquivoOrdenado.csv")
+        remove("arquivoOrdenado.csv");
 
     apresentacao();
     Dados d;
