@@ -492,6 +492,57 @@ int main()
     return 0;
 }
 ```
+## divideArquivo()
+Este método foi utilizado para dividir o arquivo principal "data_athlete_event.bin" em subarquivos menores com 50.000 registros cada, de modo a evitar a sobrecarga da memória principal ao realizar a ordenação.
+
+```cpp
+void Dados::divideArquivo(int &numeroArquivos) 
+{
+    //esse metodo vai dividir o arquivo data_athlete_event.bin em varios arquivos menores
+    cout << "Dividindo o arquivo..." << endl;
+    ifstream arquivo;
+    arquivo.open("base.bin", ios::binary);
+    if (arquivo.is_open()) 
+    {
+        //calcula o numero de arquivos menores
+        arquivo.seekg(0, ios::end);
+        int numeroDados = arquivo.tellg() / sizeof(Dados);
+        arquivo.seekg(sizeof(Dados), ios::beg);
+        numeroArquivos = (numeroDados / 50000) + 1;
+        //cria os arquivos
+        for (int i = 0; i < numeroArquivos; i++) 
+        {
+            ofstream arquivo;
+            arquivo.open("data_athlete_event" + to_string(i) + ".bin", ios::binary);
+            arquivo.close();
+        }
+        //le os dados do arquivo original e escreve nos arquivos menores
+        for (int i = 0; i < numeroArquivos; i++) 
+        {
+            int j = 0;
+            while(arquivo.good() and j < 50000) 
+            {
+                Dados dado;
+                arquivo.read((char*)&dado, sizeof(Dados));
+                ofstream arquivo;
+                arquivo.open("data_athlete_event" + to_string(i) + ".bin", ios::binary | ios::app);
+                if (arquivo.is_open()) 
+                {
+                    arquivo.write((char*)&dado, sizeof(Dados));
+                    arquivo.close();
+                } else {
+                    cout << "Erro ao abrir o arquivo auxiliar: " << i << endl;
+                }
+                j++;
+            }
+        }
+        arquivo.close();
+    } else {
+        cout << "Erro ao abrir o arquivo na divisao" << endl;
+    }
+    cout << "Arquivo dividido em " << numeroArquivos << " arquivos!" << endl;
+}
+```
 
 
 
